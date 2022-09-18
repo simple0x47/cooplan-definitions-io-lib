@@ -16,11 +16,12 @@ pub struct CategoryFileIO {
 }
 
 impl CategoryFileIO {
-    pub fn new(root: &str, path: &str) -> CategoryFileIO {
-        CategoryFileIO {
-            root: root.to_string(),
-            path: path.to_string(),
-        }
+    pub fn new(root: String, path: String) -> CategoryFileIO {
+        CategoryFileIO { root, path }
+    }
+
+    pub fn root(&self) -> &str {
+        self.root.as_str()
     }
 
     pub fn path(&self) -> &str {
@@ -132,11 +133,11 @@ impl CategoryIO for CategoryFileIO {
     }
 }
 
-fn build_for_path(root: String) -> Result<Vec<Box<dyn CategoryIO>>, Error> {
+fn build_for_path(root: &str, dir: &str) -> Result<Vec<Box<dyn CategoryIO>>, Error> {
     const CATEGORY_FILE_EXTENSION: &str = ".json";
 
     let mut categories_files_io: Vec<Box<dyn CategoryIO>> = Vec::new();
-    match std::fs::read_dir(root.clone()) {
+    match std::fs::read_dir(dir) {
         Ok(read) => {
             let mut directories: Vec<DirEntry> = Vec::new();
 
@@ -149,8 +150,10 @@ fn build_for_path(root: String) -> Result<Vec<Box<dyn CategoryIO>>, Error> {
                             if file_type.is_dir() {
                                 directories.push(entry);
                             } else if path.ends_with(CATEGORY_FILE_EXTENSION) {
-                                categories_files_io
-                                    .push(Box::new(CategoryFileIO::new(&root, path)));
+                                categories_files_io.push(Box::new(CategoryFileIO::new(
+                                    root.to_string(),
+                                    path.to_string(),
+                                )));
                             }
                         }
                         None => {
@@ -167,7 +170,7 @@ fn build_for_path(root: String) -> Result<Vec<Box<dyn CategoryIO>>, Error> {
             for directory in directories {
                 match directory.path().to_str() {
                     Some(path) => {
-                        match build_for_path(path.to_string()) {
+                        match build_for_path(root, path) {
                             Ok(mut child_categories_files_io) => {
                                 let current_size = categories_files_io.len();
                                 let child_size = child_categories_files_io.len();
@@ -209,5 +212,5 @@ fn build_for_path(root: String) -> Result<Vec<Box<dyn CategoryIO>>, Error> {
 pub fn build_for_all_categories(
     categories_directory: String,
 ) -> Result<Vec<Box<dyn CategoryIO>>, Error> {
-    build_for_path(categories_directory)
+    build_for_path(categories_directory.as_str(), categories_directory.as_str())
 }

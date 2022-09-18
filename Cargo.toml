@@ -9,7 +9,7 @@ license = "MIT"
 
 [dependencies]
 
-cooplan-definitions-lib = "0.1.1"
+cooplan-definitions-lib = "0.1.2"
 
 serde = { version = "1.0.141", features = ["derive"] }
 serde_json = "1.0.82"

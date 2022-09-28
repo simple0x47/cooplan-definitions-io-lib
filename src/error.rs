@@ -7,6 +7,7 @@ pub enum ErrorKind {
     IdNotFound,
     ParentNotAvailable,
     FailedToBorrowCategory,
+    Other,
 }
 
 #[derive(Debug)]
@@ -44,6 +45,7 @@ impl From<cooplan_definitions_lib::error::Error> for Error {
             cooplan_definitions_lib::error::ErrorKind::ParentNotAvailable => {
                 ErrorKind::ParentNotAvailable
             }
+            _ => ErrorKind::Other,
         };
 
         Error {
